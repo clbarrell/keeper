@@ -1,7 +1,7 @@
 import React, { useEffect, useState, ChangeEvent } from "react";
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import "./App.css";
-import { format } from "date-fns";
+import { format, sub, endOfDay, startOfDay } from "date-fns";
 import data from "./data";
 
 type tabSummaryType = { ts: number; count: number; date: Date; dateStr: string; hourStr: string }[];
@@ -11,6 +11,7 @@ const App = () => {
   const [filteredTabActivity, setFilteredTabActivity] = useState<tabSummaryType>([]);
   const [startFilter, setStartFilter] = useState<Date | null>(null);
   const [endFilter, setEndFilter] = useState<Date | null>(null);
+  const [dayFilter, setDayFilter] = useState(-1);
 
   /**useEffect(() => {
     chrome.storage.local.get(["tabChanges", "tabActivity"], function (result) {
@@ -73,10 +74,6 @@ const App = () => {
     }
     console.log("new tabActivity", summary);
 
-    // prarse for blank bits
-    // find a 0 count
-    // see how long the stretch goes
-    // remove the middle of the gap - so keep start and end 0
     const DELETE_SPAN_SEARCH = 7;
     let zeroCount = 0;
     for (let i = summary.length - 1; i >= 0; i--) {
@@ -107,7 +104,20 @@ const App = () => {
     }
   }, [endFilter, startFilter, tabActivity]);
 
-  const inputCSS = "p-2 bg-gray-200 mt-2 text-gray-700 w-full";
+  useEffect(() => {
+    if (dayFilter >= 0) {
+      const newDate = sub(new Date(), { days: dayFilter });
+      // setEndFilter to endOfDay
+      setEndFilter(endOfDay(newDate));
+      // setStartFilter to startOfDay
+      setStartFilter(startOfDay(newDate));
+    } else if (tabActivity.length > 0) {
+      setEndFilter(tabActivity[tabActivity.length - 1].date);
+      setStartFilter(tabActivity[0].date);
+    }
+  }, [dayFilter, tabActivity]);
+
+  const inputCSS = "p-2 bg-gray-200 mt-2 text-gray-700 w-full h-12";
 
   const formatDateForInput = (d: Date | null) => {
     if (d) {
@@ -122,6 +132,21 @@ const App = () => {
 
   const handleToChange = (e: ChangeEvent<HTMLInputElement>) => {
     setEndFilter(new Date(e.target.value));
+  };
+
+  const daySelectOptions = [
+    { value: -1, label: "All days" },
+    { value: 0, label: format(new Date(), "EEEE do MMM '(Today)'") },
+    { value: 1, label: format(sub(new Date(), { days: 1 }), "EEEE do MMM") },
+    { value: 2, label: format(sub(new Date(), { days: 2 }), "EEEE do MMM") },
+    { value: 3, label: format(sub(new Date(), { days: 3 }), "EEEE do MMM") },
+    { value: 4, label: format(sub(new Date(), { days: 4 }), "EEEE do MMM") },
+    { value: 5, label: format(sub(new Date(), { days: 5 }), "EEEE do MMM") },
+  ];
+
+  // DAY CHANGE INPUT STUFF
+  const handleDayChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setDayFilter(Number(e.target.value));
   };
 
   return (
@@ -146,7 +171,7 @@ const App = () => {
         <div className="mt-6">
           <p className="text-lg font-bold mb-6">Filters</p>
           <div className="flex text-left max-w-2xl mx-auto">
-            <div className="flex-auto mx-2">
+            <div className="flex-1 mx-2">
               <p className="text-gray-600 text-sm">From</p>
               <input
                 type="datetime-local"
@@ -156,9 +181,7 @@ const App = () => {
                 value={formatDateForInput(startFilter)}
                 onChange={handleFromChange}
               />
-            </div>
-            <div className="flex-auto mx-2">
-              <p className="text-gray-600 text-sm">To</p>
+              <p className="text-gray-600 text-sm mt-4">To</p>
               <input
                 type="datetime-local"
                 name="to"
@@ -167,6 +190,14 @@ const App = () => {
                 value={formatDateForInput(endFilter)}
                 onChange={handleToChange}
               />
+            </div>
+            <div className="flex-1 mx-2">
+              <p className="text-gray-600 text-sm">Day filters</p>
+              <select name="dayFilter" id="dayFilter" onChange={handleDayChange} className={inputCSS}>
+                {daySelectOptions.map((dso) => (
+                  <option value={dso.value} label={dso.label} key={dso.value} />
+                ))}
+              </select>
             </div>
           </div>
         </div>
