@@ -2,7 +2,6 @@ import React, { useEffect, useState, ChangeEvent } from "react";
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import "./App.css";
 import { format, sub, endOfDay, startOfDay } from "date-fns";
-import data from "./data";
 
 type tabSummaryType = { ts: number; count: number; date: Date; dateStr: string; hourStr: string }[];
 
@@ -13,88 +12,60 @@ const App = () => {
   const [endFilter, setEndFilter] = useState<Date | null>(null);
   const [dayFilter, setDayFilter] = useState(-1);
 
-  /**useEffect(() => {
+  useEffect(() => {
     chrome.storage.local.get(["tabChanges", "tabActivity"], function (result) {
       const arrOfTS: number[] = result.tabChanges || [];
-      const tabActivityStr: tabSummaryType = result.tabActivity || [];
-      const summary = tabActivityStr.map((ta) => ({ ts: ta.ts, count: ta.count, date: new Date(ta.date) }));
+      const tabActivityStr: tabSummaryType = result.tabActivity || []; // won't be right - need to toJson() the date
+      const summary: tabSummaryType = tabActivityStr.map((ta) => ({
+        ts: ta.ts,
+        count: ta.count,
+        date: new Date(ta.date),
+        dateStr: ta.dateStr,
+        hourStr: ta.hourStr,
+      }));
       // nearest 5 minute window
       const fiveMins = 1000 * 60 * 5;
       const maxBookend = Math.floor(Math.max(...arrOfTS) / fiveMins) * fiveMins;
 
       const minTS = Math.min(...arrOfTS);
       const minBookend = Math.floor(minTS / fiveMins) * fiveMins;
-      // console.log(arrOfTS, summary, maxBookend, minBookend);
 
       // now loop through 5min range and record counts
       for (let currentTS = minBookend; currentTS < maxBookend; currentTS += fiveMins) {
-        // console.log("Current loop", currentTS, new Date(currentTS).toLocaleTimeString());
-        // calc maxR
         const maxR = currentTS + fiveMins;
-        // filter  and count
         const count = arrOfTS.filter((ts) => currentTS < ts && ts < maxR).length;
-        // save count
-        // console.log("Count:", count);
-
-        summary.push({ ts: currentTS, count: count, date: new Date(currentTS) });
+        const d = new Date(currentTS);
+        summary.push({
+          ts: currentTS,
+          count: count,
+          date: d,
+          hourStr: format(d, "H:mm"),
+          dateStr: format(d, "eee do"),
+        });
       }
       console.log("new tabActivity", summary);
 
+      const DELETE_SPAN_SEARCH = 7;
+      let zeroCount = 0;
+      for (let i = summary.length - 1; i >= 0; i--) {
+        const item = summary[i];
+        if (item.count === 0) {
+          zeroCount++;
+        } else {
+          if (zeroCount >= DELETE_SPAN_SEARCH) {
+            summary.splice(i + 1, zeroCount - 2);
+          }
+          zeroCount = 0;
+        }
+      }
+
       // Save left over tab changes
       // const remainingTabChanges = arrOfTS.filter((ts) => ts > maxBookend);
-      // chrome.storage.local.set({ tabChanges: remainingTabChanges, tabActivity:    });
+      // chrome.storage.local.set({ tabChanges: remainingTabChanges, tabActivity: summary });
       setTabActivity(summary);
+      setEndFilter(summary[summary.length - 1].date);
+      setStartFilter(summary[0].date);
     });
-  }, []); **/
-
-  useEffect(() => {
-    const arrOfTS: number[] = data();
-    const tabActivityStr: tabSummaryType = []; // won't be right - need to toJson() the date
-    const summary: tabSummaryType = tabActivityStr.map((ta) => ({
-      ts: ta.ts,
-      count: ta.count,
-      date: new Date(ta.date),
-      dateStr: ta.dateStr,
-      hourStr: ta.hourStr,
-    }));
-    // nearest 5 minute window
-    const fiveMins = 1000 * 60 * 5;
-    const maxBookend = Math.floor(Math.max(...arrOfTS) / fiveMins) * fiveMins;
-
-    const minTS = Math.min(...arrOfTS);
-    const minBookend = Math.floor(minTS / fiveMins) * fiveMins;
-    // console.log(arrOfTS, summary, maxBookend, minBookend);
-
-    // now loop through 5min range and record counts
-    for (let currentTS = minBookend; currentTS < maxBookend; currentTS += fiveMins) {
-      const maxR = currentTS + fiveMins;
-      const count = arrOfTS.filter((ts) => currentTS < ts && ts < maxR).length;
-      const d = new Date(currentTS);
-      summary.push({ ts: currentTS, count: count, date: d, hourStr: format(d, "H:mm"), dateStr: format(d, "eee do") });
-    }
-    console.log("new tabActivity", summary);
-
-    const DELETE_SPAN_SEARCH = 7;
-    let zeroCount = 0;
-    for (let i = summary.length - 1; i >= 0; i--) {
-      const item = summary[i];
-      if (item.count === 0) {
-        zeroCount++;
-      } else {
-        if (zeroCount >= DELETE_SPAN_SEARCH) {
-          summary.splice(i + 1, zeroCount - 2);
-        }
-        zeroCount = 0;
-      }
-    }
-
-    // Save left over tab changes
-    // const remainingTabChanges = arrOfTS.filter((ts) => ts > maxBookend);
-    // chrome.storage.local.set({ tabChanges: remainingTabChanges, tabActivity:    });
-    setTabActivity(summary);
-    // setFilteredTabActivity(summary);
-    setEndFilter(summary[summary.length - 1].date);
-    setStartFilter(summary[0].date);
   }, []);
 
   useEffect(() => {
