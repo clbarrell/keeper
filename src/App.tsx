@@ -1,7 +1,7 @@
 import React, { useEffect, useState, ChangeEvent } from "react";
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import "./App.css";
-import { format, sub, endOfDay, startOfDay } from "date-fns";
+import { format, sub, endOfDay, startOfDay, add } from "date-fns";
 
 type tabSummaryType = { ts: number; count: number; date: Date; dateStr: string; hourStr: string }[];
 
@@ -63,8 +63,8 @@ const App = () => {
       // const remainingTabChanges = arrOfTS.filter((ts) => ts > maxBookend);
       // chrome.storage.local.set({ tabChanges: remainingTabChanges, tabActivity: summary });
       setTabActivity(summary);
-      setEndFilter(summary[summary.length - 1].date);
-      setStartFilter(summary[0].date);
+      setEndFilter(add(summary[summary.length - 1].date, {hours: 1}));
+      setStartFilter(sub(summary[0].date, {hours: 1}));
     });
   }, []);
 
@@ -83,8 +83,8 @@ const App = () => {
       // setStartFilter to startOfDay
       setStartFilter(startOfDay(newDate));
     } else if (tabActivity.length > 0) {
-      setEndFilter(tabActivity[tabActivity.length - 1].date);
-      setStartFilter(tabActivity[0].date);
+      setEndFilter(add(tabActivity[tabActivity.length - 1].date, {hours: 1}));
+      setStartFilter(sub(tabActivity[0].date, {hours: 1}));
     }
   }, [dayFilter, tabActivity]);
 
@@ -129,13 +129,12 @@ const App = () => {
         <div className="flex justify-center">
           <ResponsiveContainer width={"90%"} height={300}>
             <BarChart data={filteredTabActivity} margin={{ top: 50, right: 30, left: -10, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="5 5" vertical={false} />
+              <CartesianGrid strokeDasharray="5 5" vertical={false} stroke="#E9D8FD" />
               <XAxis dataKey="hourStr" />
               <XAxis dataKey="dateStr" axisLine={false} tickLine={false} xAxisId="date" />
               <YAxis />
               <Tooltip />
-              {/* <Line type="monotone" dataKey="count" stroke="#8884d8" /> */}
-              <Bar dataKey="count" fill="#8884d8" />
+              <Bar dataKey="count" fill="#9F7AEA" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -163,8 +162,11 @@ const App = () => {
               />
             </div>
             <div className="flex-1 mx-2">
-              <p className="text-gray-600 text-sm">Day filters</p>
-              <select name="dayFilter" id="dayFilter" onChange={handleDayChange} className={inputCSS}>
+              <p className="text-gray-600 text-sm">Day filters
+                <button className="float-right underline text-gray-600 px-2 hover:bg-gray-300" onClick={() => setDayFilter(0)}>today only</button>
+                <button className="float-right underline text-gray-600 px-2 hover:bg-gray-300 ml-1" onClick={() => setDayFilter(-1)}>all days</button>
+              </p>
+              <select name="dayFilter" id="dayFilter" onChange={handleDayChange} className={inputCSS} value={dayFilter}>
                 {daySelectOptions.map((dso) => (
                   <option value={dso.value} label={dso.label} key={dso.value} />
                 ))}
