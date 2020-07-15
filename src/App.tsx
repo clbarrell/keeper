@@ -81,7 +81,9 @@ const App = () => {
     let tabActivityCopy = tabActivity.slice(0);
 
     if (endFilter && startFilter) {
-      tabActivityCopy = tabActivityCopy.filter((tc) => tc.date > startFilter && tc.date < endFilter)
+      tabActivityCopy = tabActivityCopy.filter(
+        (tc) => tc.date > startFilter && tc.date < endFilter
+      );
     }
 
     if (removeInactivePeriods) {
@@ -91,6 +93,11 @@ const App = () => {
         const item = tabActivityCopy[i];
         if (item.count === 0) {
           zeroCount++;
+          // Catch the start
+          if (i === 0) {
+            console.log("Start was empty");
+            tabActivityCopy.splice(i, zeroCount);
+          }
         } else {
           if (zeroCount >= DELETE_SPAN_SEARCH) {
             tabActivityCopy.splice(i + 1, zeroCount - 2);
@@ -101,7 +108,6 @@ const App = () => {
     }
 
     setFilteredTabActivity(tabActivityCopy);
-
   }, [endFilter, startFilter, tabActivity, removeInactivePeriods]);
 
   useEffect(() => {
@@ -230,7 +236,14 @@ const App = () => {
                 ))}
               </select>
               <label className="mt-4 block cursor-pointer text-gray-600">
-                <input type="checkbox" className="mr-3" onClick={() => {setRemoveInactivePeriods(!removeInactivePeriods)}} checked={removeInactivePeriods} />
+                <input
+                  type="checkbox"
+                  className="mr-3"
+                  onClick={() => {
+                    setRemoveInactivePeriods(!removeInactivePeriods);
+                  }}
+                  checked={removeInactivePeriods}
+                />
                 Remove inactive periods
               </label>
             </div>
