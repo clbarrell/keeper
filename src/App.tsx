@@ -6,10 +6,10 @@ import {
   Tooltip,
   ResponsiveContainer,
   BarChart,
-  Bar,
+  Bar, ReferenceLine
 } from "recharts";
 import "./App.css";
-import { format, sub, endOfDay, startOfDay, add } from "date-fns";
+import { format, sub, endOfDay, add, startOfHour, setHours } from "date-fns";
 
 type tabSummaryType = {
   ts: number;
@@ -28,6 +28,9 @@ const App = () => {
   const [endFilter, setEndFilter] = useState<Date | null>(null);
   const [dayFilter, setDayFilter] = useState(-1);
   const [removeInactivePeriods, setRemoveInactivePeriods] = useState(true);
+  const [yAxisLimit, setYAxisLimit] = useState(20);
+  const [dayStartAt, setDayStartAt] = useState(8);
+  const [showRefLine, setShowRefLine] = useState<null | number>(null)
 
   useEffect(() => {
     chrome.storage.local.get(["tabChanges", "tabActivity"], function (result) {
@@ -115,13 +118,13 @@ const App = () => {
       const newDate = sub(new Date(), { days: dayFilter });
       // setEndFilter to endOfDay
       setEndFilter(endOfDay(newDate));
-      // setStartFilter to startOfDay
-      setStartFilter(startOfDay(newDate));
+      // setStartFilter to startOfDay business day @ 8am
+      setStartFilter(startOfHour(setHours(newDate, dayStartAt)));
     } else if (tabActivity.length > 0) {
       setEndFilter(add(tabActivity[tabActivity.length - 1].date, { hours: 1 }));
       setStartFilter(sub(tabActivity[0].date, { hours: 1 }));
     }
-  }, [dayFilter, tabActivity]);
+  }, [dayFilter, tabActivity, dayStartAt]);
 
   const inputCSS = "p-2 bg-gray-200 mt-2 text-gray-700 w-full h-12";
 
@@ -179,15 +182,18 @@ const App = () => {
                 tickLine={false}
                 xAxisId="date"
               />
-              <YAxis />
+              <YAxis domain={[0, yAxisLimit]} />
               <Tooltip />
               <Bar dataKey="count" fill="#9F7AEA" />
+              { showRefLine != null && (
+                <ReferenceLine y={showRefLine} label="Ref" stroke="#48BB78" />
+              )}
             </BarChart>
           </ResponsiveContainer>
         </div>
         <div className="mt-6">
           <p className="text-lg font-bold mb-6">Filters</p>
-          <div className="flex text-left max-w-2xl mx-auto">
+          <div className="flex text-left max-w-2xl mx-auto p-5 border-2 border-gray-200">
             <div className="flex-1 mx-2">
               <p className="text-gray-600 text-sm">From</p>
               <input
@@ -235,17 +241,51 @@ const App = () => {
                   <option value={dso.value} label={dso.label} key={dso.value} />
                 ))}
               </select>
-              <label className="mt-4 block cursor-pointer text-gray-600">
-                <input
-                  type="checkbox"
-                  className="mr-3"
-                  onClick={() => {
-                    setRemoveInactivePeriods(!removeInactivePeriods);
-                  }}
-                  checked={removeInactivePeriods}
-                />
-                Remove inactive periods
-              </label>
+              <p className="text-gray-600 text-sm mt-4">Options </p>
+              <div className="mt-2 p-2 bg-gray-200 text-sm">
+                <label className="block cursor-pointer mb-2 px-2 py-1">
+                  <input
+                    type="checkbox"
+                    className="mr-3"
+                    onClick={() => {
+                      setRemoveInactivePeriods(!removeInactivePeriods);
+                    }}
+                    checked={removeInactivePeriods}
+                  />
+                  Remove inactive periods
+                </label>
+                <div className="my-2">
+                  <input
+                    type="number"
+                    name="dayStart"
+                    id="dayStart"
+                    max={12}
+                    min={0}
+                    className="w-16 mr-2 px-2 py-1"
+                    onChange={(e) => setDayStartAt(Number(e.target.value))}
+                    value={dayStartAt}
+                  />
+                  <span>start of day (am)</span>
+                </div>
+                <div className="my-2">
+                  <input
+                    type="number"
+                    name="yAxisLimit"
+                    id="yAxisLimit"
+                    max={100}
+                    min={10}
+                    className="w-16 mr-2 px-2 py-1"
+                    onChange={(e) => setYAxisLimit(Number(e.target.value))}
+                    value={yAxisLimit}
+                  />
+                  <span>limit of y axis</span>
+                </div>
+                <div>
+                  <input type="number" name="refLine" id="refLine" className="w-16 mr-2 px-2 py-1" onChange={(e) => setShowRefLine(Number(e.target.value))}
+                    value={showRefLine === null ? '' : showRefLine} placeholder="..." />
+                  <span>show reference line</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
