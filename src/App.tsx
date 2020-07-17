@@ -24,6 +24,8 @@ type tabDataSlice = {
   moodRating?: number;
 };
 
+const minuteMS = 1000 * 60;
+
 const App = () => {
   const [tabActivity, setTabActivity] = useState<tabSummaryType>([]);
   const [filteredTabActivity, setFilteredTabActivity] = useState<
@@ -36,6 +38,22 @@ const App = () => {
   const [yAxisLimit, setYAxisLimit] = useState(20);
   const [dayStartAt, setDayStartAt] = useState(8);
   const [showRefLine, setShowRefLine] = useState<null | number>(null);
+  const [chartGrouping, setChartGrouping] = useState(minuteMS * 5); // five mins default
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      const key = e.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
+      if (key === "ArrowLeft") {
+        setDayFilter(dayFilter + 1);
+      } else if (key === "ArrowRight") {
+        setDayFilter(Math.max(dayFilter - 1, 0));
+      }
+    };
+    document.addEventListener("keydown", handleKeyPress);
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [dayFilter]);
 
   useEffect(() => {
     chrome.storage.local.get(
@@ -53,20 +71,23 @@ const App = () => {
           hourStr: ta.hourStr,
         }));
         // nearest 5 minute window
-        const fiveMins = 1000 * 60 * 5;
         const maxBookend =
-          Math.floor(Math.max(...arrOfTS) / fiveMins) * fiveMins;
+          Math.floor(Math.max(...arrOfTS) / chartGrouping) * chartGrouping;
 
         const minTS = Math.min(...arrOfTS);
-        const minBookend = Math.floor(minTS / fiveMins) * fiveMins;
+        const minBookend = Math.floor(minTS / chartGrouping) * chartGrouping;
+        console.log(
+          "Calculated the bookend stuff",
+          new Date().toLocaleTimeString()
+        );
 
         // now loop through 5min range and record counts
         for (
           let currentTS = minBookend;
           currentTS < maxBookend;
-          currentTS += fiveMins
+          currentTS += chartGrouping
         ) {
-          const maxR = currentTS + fiveMins;
+          const maxR = currentTS + chartGrouping;
           const count = arrOfTS.filter((ts) => currentTS < ts && ts < maxR)
             .length;
           const mood = moodRatings.filter(
@@ -85,8 +106,12 @@ const App = () => {
             dataPoint.moodRating = mood[0].rating;
           }
           summary.push(dataPoint);
+          // console.log("looping", currentTS, count);
         }
-        // console.log("new tabActivity", summary);
+        console.log(
+          "Finished creating summary",
+          new Date().toLocaleTimeString()
+        );
 
         // Save left over tab changes
         // const remainingTabChanges = arrOfTS.filter((ts) => ts > maxBookend);
@@ -96,7 +121,7 @@ const App = () => {
         setStartFilter(sub(summary[0].date, { hours: 1 }));
       }
     );
-  }, []);
+  }, [chartGrouping]);
 
   useEffect(() => {
     // filter tabActivity
@@ -286,6 +311,9 @@ const App = () => {
                   <option value={dso.value} label={dso.label} key={dso.value} />
                 ))}
               </select>
+              <p className="text-xs text-gray-500 mt-1">
+                {"<"} use arrows to change days {">"}
+              </p>
               <p className="text-gray-600 text-sm mt-4">Options </p>
               <div className="mt-2 p-2 bg-gray-200 text-sm">
                 <label className="block cursor-pointer mb-2 px-2 py-1">
@@ -325,7 +353,7 @@ const App = () => {
                   />
                   <span>limit of y axis</span>
                 </div>
-                <div>
+                <div className="my-2">
                   <input
                     type="number"
                     name="refLine"
@@ -336,6 +364,22 @@ const App = () => {
                     placeholder="..."
                   />
                   <span>show reference line</span>
+                </div>
+                <div className="my-2">
+                  <select
+                    name="chartGrouping"
+                    id="chartGrouping"
+                    onChange={(e) => setChartGrouping(Number(e.target.value))}
+                    className="w-16 mr-2 px-2 py-1"
+                    value={chartGrouping}
+                  >
+                    <option value={5 * minuteMS} label={"5m"} />
+                    <option value={10 * minuteMS} label={"10m"} />
+                    <option value={15 * minuteMS} label={"15m"} />
+                    <option value={30 * minuteMS} label={"30m"} />
+                    <option value={60 * minuteMS} label={"60m"} />
+                  </select>
+                  <span>timespan groups</span>
                 </div>
               </div>
             </div>
