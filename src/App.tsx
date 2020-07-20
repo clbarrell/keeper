@@ -1,38 +1,32 @@
 import React, { useEffect, useState, ChangeEvent } from "react";
-import {
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-} from "recharts";
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Line, Bar } from "recharts";
 import "./App.css";
 import { format, sub, endOfDay, startOfDay, add } from "date-fns";
 
-type tabSummaryType = {
+type tabSummaryType = tabDataSlice[];
+
+type tabDataSlice = {
   ts: number;
   count: number;
   date: Date;
   dateStr: string;
   hourStr: string;
-}[];
+  moodRating?: number;
+};
 
 const App = () => {
   const [tabActivity, setTabActivity] = useState<tabSummaryType>([]);
-  const [filteredTabActivity, setFilteredTabActivity] = useState<
-    tabSummaryType
-  >([]);
+  const [filteredTabActivity, setFilteredTabActivity] = useState<tabSummaryType>([]);
   const [startFilter, setStartFilter] = useState<Date | null>(null);
   const [endFilter, setEndFilter] = useState<Date | null>(null);
   const [dayFilter, setDayFilter] = useState(-1);
   const [removeInactivePeriods, setRemoveInactivePeriods] = useState(true);
 
   useEffect(() => {
-    chrome.storage.local.get(["tabChanges", "tabActivity"], function (result) {
+    chrome.storage.local.get(["tabChanges", "tabActivity", "moodRatings"], function (result) {
       const arrOfTS: number[] = result.tabChanges || [];
       const tabActivityStr: tabSummaryType = result.tabActivity || []; // won't be right - need to toJson() the date
+      const moodRatings: { time: number; rating: number }[] = result.moodRatings || [];
       const summary: tabSummaryType = tabActivityStr.map((ta) => ({
         ts: ta.ts,
         count: ta.count,
@@ -48,22 +42,23 @@ const App = () => {
       const minBookend = Math.floor(minTS / fiveMins) * fiveMins;
 
       // now loop through 5min range and record counts
-      for (
-        let currentTS = minBookend;
-        currentTS < maxBookend;
-        currentTS += fiveMins
-      ) {
+      for (let currentTS = minBookend; currentTS < maxBookend; currentTS += fiveMins) {
         const maxR = currentTS + fiveMins;
-        const count = arrOfTS.filter((ts) => currentTS < ts && ts < maxR)
-          .length;
+        const count = arrOfTS.filter((ts) => currentTS < ts && ts < maxR).length;
+        const mood = moodRatings.filter((mr) => currentTS < mr.time && mr.time < maxR);
         const d = new Date(currentTS);
-        summary.push({
+        const dataPoint: tabDataSlice = {
           ts: currentTS,
           count: count,
           date: d,
           hourStr: format(d, "H:mm"),
           dateStr: format(d, "eee do"),
-        });
+        };
+        if (mood.length > 0) {
+          // add to dataPoint
+          dataPoint.moodRating = mood[0].rating;
+        }
+        summary.push(dataPoint);
       }
       // console.log("new tabActivity", summary);
 
@@ -81,9 +76,7 @@ const App = () => {
     let tabActivityCopy = tabActivity.slice(0);
 
     if (endFilter && startFilter) {
-      tabActivityCopy = tabActivityCopy.filter(
-        (tc) => tc.date > startFilter && tc.date < endFilter
-      );
+      tabActivityCopy = tabActivityCopy.filter((tc) => tc.date > startFilter && tc.date < endFilter);
     }
 
     if (removeInactivePeriods) {
@@ -162,27 +155,24 @@ const App = () => {
         <h2>Number of tab changes per 5 mins</h2>
 
         <div className="flex justify-center">
-          <ResponsiveContainer width={"90%"} height={300}>
-            <BarChart
-              data={filteredTabActivity}
-              margin={{ top: 50, right: 30, left: -10, bottom: 5 }}
-            >
-              <CartesianGrid
-                strokeDasharray="5 5"
-                vertical={false}
-                stroke="#E9D8FD"
-              />
+          <ResponsiveContainer width={"90%"} height={380}>
+            <ComposedChart data={filteredTabActivity} margin={{ top: 50, right: 30, left: -10, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="5 5" vertical={false} stroke="#E9D8FD" />
               <XAxis dataKey="hourStr" />
-              <XAxis
-                dataKey="dateStr"
-                axisLine={false}
-                tickLine={false}
-                xAxisId="date"
-              />
+              <XAxis dataKey="dateStr" axisLine={false} tickLine={false} xAxisId="date" />
               <YAxis />
+              <YAxis yAxisId="right" orientation="right" domain={[0, 5]} />
               <Tooltip />
               <Bar dataKey="count" fill="#9F7AEA" />
-            </BarChart>
+              <Line
+                type="monotone"
+                dataKey="moodRating"
+                stroke="#ff5f90"
+                connectNulls
+                strokeWidth={2}
+                yAxisId="right"
+              />
+            </ComposedChart>
           </ResponsiveContainer>
         </div>
         <div className="mt-6">
@@ -224,13 +214,7 @@ const App = () => {
                   all days
                 </button>
               </p>
-              <select
-                name="dayFilter"
-                id="dayFilter"
-                onChange={handleDayChange}
-                className={inputCSS}
-                value={dayFilter}
-              >
+              <select name="dayFilter" id="dayFilter" onChange={handleDayChange} className={inputCSS} value={dayFilter}>
                 {daySelectOptions.map((dso) => (
                   <option value={dso.value} label={dso.label} key={dso.value} />
                 ))}

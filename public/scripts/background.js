@@ -25,7 +25,7 @@ chrome.tabs.onActivated.addListener((t) => {
         const fiveMins = 1000 * 60 * 5;
         const limit = Date.now() - fiveMins;
         const numOfRecentTabChanges = tabChanges.filter((tc) => tc > limit).length;
-        if (numOfRecentTabChanges > changeThreshold && lastAlert < limit) {
+        if (numOfRecentTabChanges > changeThreshold && lastAlert < limit - fiveMins) {
           console.log(`Getting mood input \nnow:\t${new Date()}, \nlast:\t${new Date(lastAlert)}`);
           chrome.storage.local.set({ lastAlert: Date.now(), lastActiveTab: currentTabId });
           chrome.tabs.create({ url: chrome.runtime.getURL("scripts/moodModal.html") });
