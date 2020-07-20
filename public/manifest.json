@@ -4,17 +4,22 @@
   "description": "Keep an eye on your tab activity",
   "manifest_version": 2,
   "background": {
-    "scripts": ["background.js"],
+    "scripts": ["scripts/background.js"],
     "persistent": false
   },
   "browser_action": {
     "title": "Tab Thief"
   },
+  "web_accessible_resources": [
+    "scripts/moodModal.html",
+    "scripts/moodModal.css",
+    "scripts/moodModal.js",
+    "logos/logo125.png"
+  ],
   "icons": {
     "125": "logos/logo125.png",
     "250": "logos/logo250.png",
     "375": "logos/logo375.png"
   },
-  "permissions": ["storage", "tabs", "activeTab", "notifications"],
-  "content_scripts": []
+  "permissions": ["storage", "activeTab", "notifications", "tabs"]
 }

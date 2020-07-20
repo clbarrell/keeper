@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Keeper Mood</title>
+    <script src="moodModal.js"></script>
+    <style>
+      body {
+        background: #322748;
+      }
+
+      .mood-modal {
+        width: 480px;
+        background-color: white;
+        font-size: 16px;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 2em;
+        font-weight: bold;
+        z-index: 9999999;
+        border-radius: 8px;
+        color: #4a5568;
+        font-family: -apple-system, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
+        opacity: 1;
+        transition: opacity 0.5s ease-out;
+      }
+
+      .mood-modal .modal-header {
+        font-size: 2em;
+        line-height: 1.5;
+      }
+
+      .mood-modal .mood-ratings {
+        display: flex;
+        justify-content: center;
+      }
+
+      .mood-modal button.mood-button {
+        padding: 0.8em 1.5em;
+        background: hsla(260, 54%, 96%, 1);
+        box-shadow: none;
+        border: 1px solid #9f7aea;
+        border-right: none;
+        color: #9f7aea;
+        font-weight: bold;
+        line-height: 1.2;
+        cursor: pointer;
+        flex-grow: 1;
+        font-size: 1rem;
+      }
+
+      .mood-modal button.mood-button:hover {
+        border: 1px solid #9f7aea;
+        border-right: none;
+        background: #d8cbef;
+      }
+      .mood-modal button.mood-button:first-of-type {
+        border-radius: 8px 0px 0px 8px;
+      }
+
+      .mood-modal button.mood-button:last-of-type {
+        border-radius: 0px 8px 8px 0px;
+        border-right: 1px solid #9f7aea;
+      }
+
+      .mood-modal #skipButton.skip-button {
+        background: none;
+        box-shadow: none;
+        border: none;
+        color: #718096;
+        font-weight: bold;
+        font-size: 0.8em;
+        float: right;
+        cursor: pointer;
+        padding: 0.5em 1em;
+        text-decoration: underline;
+      }
+
+      .mood-modal #skipButton.skip-button:hover {
+        background: #e8ebf5;
+      }
+
+      .margin-top {
+        margin-top: 2em;
+      }
+
+      .margin-top-sml {
+        margin-top: 1em;
+      }
+
+      .modal-backdrop {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 9999998;
+        background-color: #000;
+        opacity: 0.7;
+        backdrop-filter: blur(10px) grayscale(100%);
+      }
+
+      .mood-modal .bottom-line-buttons {
+        display: flex;
+        justify-content: left;
+        align-items: center;
+      }
+      .mood-modal .bottom-line-buttons #keeperlogo {
+        width: 1.2em;
+        height: 1.2em;
+      }
+      .mood-modal .bottom-line-buttons .logoa {
+        line-height: 1;
+        margin-left: 0.6em;
+        font-size: 1.3em;
+        color: #718096;
+      }
+
+      .mood-modal .rating-helper {
+        color: hsl(214, 17%, 55%);
+        font-size: 0.9em;
+        text-align: center;
+        margin-top: 0.5em;
+        margin-bottom: -0.2em;
+        font-weight: normal;
+        height: 18px;
+      }
+
+      .float-left {
+        float: left;
+      }
+      .float-right {
+        float: right;
+      }
+      .text-right {
+        text-align: right;
+      }
+      .hide {
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="mood-modal" id="moodModal">
+      <div class="bottom-line-buttons">
+        <img src="../logos/logo125.png" alt="logo" id="keeperlogo" /> <span class="logoa">Keeper</span>
+      </div>
+      <div class="modal-header margin-top-sml">How focused and productive are you right now?</div>
+      <div class="mood-ratings margin-top">
+        <button class="mood-button" data-value="1" data-desc="Distracted as shit">1</button>
+        <button class="mood-button" data-value="2" data-desc="Kinda distracted">2</button>
+        <button class="mood-button" data-value="3" data-desc="Juggling a few things">3</button>
+        <button class="mood-button" data-value="4" data-desc="Focussing on one thing">4</button>
+        <button class="mood-button" data-value="5" data-desc="Getting shit done">5</button>
+      </div>
+      <p class="rating-helper" id="ratingHelper">
+        <span class="float-left">Distracted</span><span class="float-right text-right">Getting shit done</span>
+      </p>
+      <div class="margin-top">
+        <button id="skipButton" class="skip-button">Skip</button>
+      </div>
+    </div>
+  </body>
+</html>
