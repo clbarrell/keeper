@@ -33,6 +33,8 @@ window.addEventListener("DOMContentLoaded", () => {
       submitRating(e.target.dataset.value);
     });
   }
+
+  document.getElementById("time").innerText = `Asked @ ${new Date().toLocaleTimeString()}`;
 });
 
 // document.getElementById("keeperlogo").src = chrome.extension.getURL("logos/logo125.png");

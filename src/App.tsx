@@ -156,12 +156,18 @@ const App = () => {
 
         <div className="flex justify-center">
           <ResponsiveContainer width={"90%"} height={380}>
-            <ComposedChart data={filteredTabActivity} margin={{ top: 50, right: 30, left: -10, bottom: 5 }}>
+            <ComposedChart data={filteredTabActivity} margin={{ top: 50, right: 25, left: 5, bottom: 5 }}>
               <CartesianGrid strokeDasharray="5 5" vertical={false} stroke="#E9D8FD" />
               <XAxis dataKey="hourStr" />
               <XAxis dataKey="dateStr" axisLine={false} tickLine={false} xAxisId="date" />
-              <YAxis />
-              <YAxis yAxisId="right" orientation="right" domain={[0, 5]} />
+              <YAxis label={{ value: "Tab changes", angle: -90, position: "insideLeft" }} />
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                domain={[1, 5]}
+                label={{ value: "Productivity", angle: -90, position: "insideRight" }}
+                ticks={[1, 2, 3, 4, 5]}
+              />
               <Tooltip />
               <Bar dataKey="count" fill="#9F7AEA" />
               <Line

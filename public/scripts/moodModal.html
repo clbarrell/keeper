@@ -73,8 +73,6 @@
         border: none;
         color: #718096;
         font-weight: bold;
-        font-size: 0.8em;
-        float: right;
         cursor: pointer;
         padding: 0.5em 1em;
         text-decoration: underline;
@@ -92,16 +90,8 @@
         margin-top: 1em;
       }
 
-      .modal-backdrop {
-        position: fixed;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        z-index: 9999998;
-        background-color: #000;
-        opacity: 0.7;
-        backdrop-filter: blur(10px) grayscale(100%);
+      .margin-bottom-sml {
+        margin-bottom: 1em;
       }
 
       .mood-modal .bottom-line-buttons {
@@ -142,6 +132,17 @@
       .hide {
         opacity: 0;
       }
+      .bottom-modal-line {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.8em;
+        margin-top: 3em;
+      }
+      .time-reminder {
+        color: #718096;
+        font-weight: normal;
+      }
     </style>
   </head>
   <body>
@@ -149,7 +150,7 @@
       <div class="bottom-line-buttons">
         <img src="../logos/logo125.png" alt="logo" id="keeperlogo" /> <span class="logoa">Keeper</span>
       </div>
-      <div class="modal-header margin-top-sml">How focused and productive are you right now?</div>
+      <div class="modal-header margin-top-sml margin-bottom-sml">How focused and productive are you right now?</div>
       <div class="mood-ratings margin-top">
         <button class="mood-button" data-value="1" data-desc="Distracted as shit">1</button>
         <button class="mood-button" data-value="2" data-desc="Kinda distracted">2</button>
@@ -160,7 +161,8 @@
       <p class="rating-helper" id="ratingHelper">
         <span class="float-left">Distracted</span><span class="float-right text-right">Getting shit done</span>
       </p>
-      <div class="margin-top">
+      <div class="bottom-modal-line">
+        <span class="time-reminder" id="time"> </span>
         <button id="skipButton" class="skip-button">Skip</button>
       </div>
     </div>
