@@ -24,8 +24,14 @@ chrome.tabs.onActivated.addListener((t) => {
         // check if there's been more than threshold tab changes
         const fiveMins = 1000 * 60 * 5;
         const limit = Date.now() - fiveMins;
+        const currentHr = new Date().getHours();
         const numOfRecentTabChanges = tabChanges.filter((tc) => tc > limit).length;
-        if (numOfRecentTabChanges > changeThreshold && lastAlert < limit - fiveMins) {
+        if (
+          numOfRecentTabChanges > changeThreshold &&
+          lastAlert < limit - fiveMins &&
+          currentHr > 8 &&
+          currentHr < 20
+        ) {
           console.log(`Getting mood input \nnow:\t${new Date()}, \nlast:\t${new Date(lastAlert)}`);
           chrome.storage.local.set({ lastAlert: Date.now(), lastActiveTab: currentTabId });
           chrome.tabs.create({ url: chrome.runtime.getURL("scripts/moodModal.html") });
