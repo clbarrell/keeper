@@ -12,6 +12,7 @@ import {
 } from "recharts";
 import "./App.css";
 import { format, sub, endOfDay, add, startOfHour, setHours } from "date-fns";
+import useChromeLocalStorage from "./lib/useChromeLocalStorage";
 
 type tabSummaryType = tabDataSlice[];
 
@@ -35,10 +36,14 @@ const App = () => {
   const [endFilter, setEndFilter] = useState<Date | null>(null);
   const [dayFilter, setDayFilter] = useState(-1);
   const [removeInactivePeriods, setRemoveInactivePeriods] = useState(true);
-  const [yAxisLimit, setYAxisLimit] = useState(20);
-  const [dayStartAt, setDayStartAt] = useState(8);
+  const [yAxisLimit, setYAxisLimit] = useChromeLocalStorage("yAxisLimit", 20);
+  const [dayStartAt, setDayStartAt] = useChromeLocalStorage("dayStartAt", 8);
   const [showRefLine, setShowRefLine] = useState<null | number>(null);
   const [chartGrouping, setChartGrouping] = useState(minuteMS * 5); // five mins default
+  const [changeThreshold, setChangeThreshold] = useChromeLocalStorage(
+    "changeThreshold",
+    10
+  ); // threshold to get mood input when change > this
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -209,7 +214,7 @@ const App = () => {
         <h2>Number of tab changes per 5 mins</h2>
 
         <div className="flex justify-center">
-          <ResponsiveContainer width={"90%"} height={380}>
+          <ResponsiveContainer width={"90%"} height={250}>
             <ComposedChart
               data={filteredTabActivity}
               margin={{ top: 50, right: 25, left: 5, bottom: 5 }}
@@ -233,6 +238,7 @@ const App = () => {
                   position: "insideLeft",
                 }}
                 domain={[0, yAxisLimit]}
+                allowDataOverflow={true}
               />
               <YAxis
                 yAxisId="right"
@@ -364,6 +370,18 @@ const App = () => {
                     placeholder="..."
                   />
                   <span>show reference line</span>
+                </div>
+                <div className="my-2">
+                  <input
+                    type="number"
+                    name="changeThreshold"
+                    id="changeThreshold"
+                    className="w-16 mr-2 px-2 py-1"
+                    onChange={(e) => setChangeThreshold(Number(e.target.value))}
+                    value={changeThreshold}
+                    placeholder="..."
+                  />
+                  <span>Tab change threshold for checkin</span>
                 </div>
                 <div className="my-2">
                   <select
