@@ -7,7 +7,11 @@ chrome.browserAction.onClicked.addListener(function () {
 chrome.tabs.onActivated.addListener((t) => {
   const currentTabId = t.tabId;
   chrome.tabs.get(currentTabId, (res) => {
-    if (/moodModal|chrome:\/\/|chrome-extension:\/\//.test(res.url)) {
+    if (
+      /moodModal|chrome:\/\/|chrome-extension:\/\//.test(res.url) ||
+      (res.pendingUrl &&
+        /moodModal|chrome:\/\/|chrome-extension:\/\//.test(res.pendingUrl))
+    ) {
       console.log("Not checking a restriced page,", res.url);
       return;
     } else {

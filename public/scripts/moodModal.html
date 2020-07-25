@@ -23,8 +23,8 @@
         z-index: 9999999;
         border-radius: 8px;
         color: #4a5568;
-        font-family: -apple-system, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
-          sans-serif;
+        font-family: -apple-system, "Segoe UI", Roboto, Oxygen, Ubuntu,
+          Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
         opacity: 1;
         transition: opacity 0.5s ease-out;
       }
@@ -34,12 +34,14 @@
         line-height: 1.5;
       }
 
-      .mood-modal .mood-ratings {
+      .mood-modal .mood-ratings,
+      .on-off-task {
         display: flex;
         justify-content: center;
       }
 
-      .mood-modal button.mood-button {
+      .mood-modal button.mood-button,
+      .moodLabel {
         padding: 0.8em 1.5em;
         background: hsla(260, 54%, 96%, 1);
         box-shadow: none;
@@ -53,16 +55,20 @@
         font-size: 1rem;
       }
 
-      .mood-modal button.mood-button:hover {
+      .mood-modal button.mood-button:hover,
+      .moodLabel:hover {
         border: 1px solid #9f7aea;
         border-right: none;
         background: #d8cbef;
       }
-      .mood-modal button.mood-button:first-of-type {
+
+      .mood-modal button.mood-button:first-of-type,
+      .moodLabel:first-of-type {
         border-radius: 8px 0px 0px 8px;
       }
 
-      .mood-modal button.mood-button:last-of-type {
+      .mood-modal button.mood-button:last-of-type,
+      .moodLabel:last-of-type {
         border-radius: 0px 8px 8px 0px;
         border-right: 1px solid #9f7aea;
       }
@@ -99,10 +105,12 @@
         justify-content: left;
         align-items: center;
       }
+
       .mood-modal .bottom-line-buttons #keeperlogo {
         width: 1.2em;
         height: 1.2em;
       }
+
       .mood-modal .bottom-line-buttons .logoa {
         line-height: 1;
         margin-left: 0.6em;
@@ -123,15 +131,19 @@
       .float-left {
         float: left;
       }
+
       .float-right {
         float: right;
       }
+
       .text-right {
         text-align: right;
       }
+
       .hide {
         opacity: 0;
       }
+
       .bottom-modal-line {
         display: flex;
         align-items: center;
@@ -139,27 +151,87 @@
         font-size: 0.8em;
         margin-top: 3em;
       }
+
       .time-reminder {
         color: #718096;
         font-weight: normal;
       }
+
+      .on-off-task input {
+        display: none;
+      }
+
+      .on-off-task label {
+        text-align: center;
+        widows: 50%;
+      }
+
+      input:checked + span:after {
+        content: "✅";
+        position: relative;
+        left: 12px;
+      }
     </style>
   </head>
+
   <body>
     <div class="mood-modal" id="moodModal">
       <div class="bottom-line-buttons">
-        <img src="../logos/logo125.png" alt="logo" id="keeperlogo" /> <span class="logoa">Keeper</span>
+        <img src="../logos/logo125.png" alt="logo" id="keeperlogo" />
+        <span class="logoa">Keeper</span>
       </div>
-      <div class="modal-header margin-top-sml margin-bottom-sml">How focused and productive are you right now?</div>
+      <div class="modal-header margin-top-sml margin-bottom-sml">
+        Are you on task or off task?
+      </div>
+      <div class="on-off-task">
+        <label for="onTask" class="moodLabel">
+          <input type="radio" name="onOffTask" value="on-task" id="onTask" />
+          <span>on task</span>
+        </label>
+        <label for="offTask" class="moodLabel" id="offTaskLabel">
+          <input type="radio" name="onOffTask" value="off-task" id="offTask" />
+          <span>off task</span>
+        </label>
+      </div>
+      <div class="modal-header margin-top-sml margin-bottom-sml">
+        How focused and productive are you right now?
+      </div>
       <div class="mood-ratings margin-top">
-        <button class="mood-button" data-value="1" data-desc="Distracted as shit">1</button>
-        <button class="mood-button" data-value="2" data-desc="Kinda distracted">2</button>
-        <button class="mood-button" data-value="3" data-desc="Juggling a few things">3</button>
-        <button class="mood-button" data-value="4" data-desc="Focussing on one thing">4</button>
-        <button class="mood-button" data-value="5" data-desc="Getting shit done">5</button>
+        <button
+          class="mood-button"
+          data-value="1"
+          data-desc="Distracted as shit"
+        >
+          1
+        </button>
+        <button class="mood-button" data-value="2" data-desc="Kinda distracted">
+          2
+        </button>
+        <button
+          class="mood-button"
+          data-value="3"
+          data-desc="Juggling a few things"
+        >
+          3
+        </button>
+        <button
+          class="mood-button"
+          data-value="4"
+          data-desc="Focussing on one thing"
+        >
+          4
+        </button>
+        <button
+          class="mood-button"
+          data-value="5"
+          data-desc="Getting shit done"
+        >
+          5
+        </button>
       </div>
       <p class="rating-helper" id="ratingHelper">
-        <span class="float-left">Distracted</span><span class="float-right text-right">Getting shit done</span>
+        <span class="float-left">Distracted</span
+        ><span class="float-right text-right">Getting shit done</span>
       </p>
       <div class="bottom-modal-line">
         <span class="time-reminder" id="time"> </span>
