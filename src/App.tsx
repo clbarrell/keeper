@@ -370,7 +370,7 @@ const App = () => {
                     placeholder="..."
                   />
                   <span>show reference line</span>
-                </div>
+                </div> 
                 <div className="my-2">
                   <input
                     type="number"
