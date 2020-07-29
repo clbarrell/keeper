@@ -36,7 +36,7 @@ chrome.tabs.onActivated.addListener((t) => {
             .length;
           if (
             numOfRecentTabChanges > changeThreshold &&
-            lastAlert < limit - fiveMins &&
+            lastAlert < limit - fiveMins * 2 &&
             currentHr > 8 &&
             currentHr < 19 &&
             ![0, 6].includes(date.getDay())
