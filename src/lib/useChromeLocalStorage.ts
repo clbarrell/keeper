@@ -12,7 +12,9 @@ export default function useChromeLocalStorage(
   // set intiial value
   chrome.storage.local.get([key], function (result) {
     // storedValue = result[key];
-    setStoredValue(result[key]);
+    if (result.hasOwnProperty(key)) {
+      setStoredValue(result[key]);
+    }
   });
 
   // Return a wrapped version of useState's setter function that ...

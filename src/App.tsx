@@ -44,6 +44,10 @@ const App = () => {
     "changeThreshold",
     10
   ); // threshold to get mood input when change > this
+  const [enableMoodCheckins, setEnableMoodCheckins] = useChromeLocalStorage(
+    "enableMoodCheckins",
+    true
+  );
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -333,6 +337,17 @@ const App = () => {
                   />
                   Remove inactive periods
                 </label>
+                <label className="block cursor-pointer mb-2 px-2 py-1">
+                  <input
+                    type="checkbox"
+                    className="mr-3"
+                    onClick={() => {
+                      setEnableMoodCheckins(!enableMoodCheckins);
+                    }}
+                    checked={enableMoodCheckins}
+                  />
+                  Enable mood checkins
+                </label>
                 <div className="my-2">
                   <input
                     type="number"
@@ -370,7 +385,7 @@ const App = () => {
                     placeholder="..."
                   />
                   <span>show reference line</span>
-                </div> 
+                </div>
                 <div className="my-2">
                   <input
                     type="number"

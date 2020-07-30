@@ -18,11 +18,14 @@ chrome.tabs.onActivated.addListener((t) => {
       // ONLY DO IF A SAFE WEBSITE
       // add to list of timestamps of tabChanges
       chrome.storage.local.get(
-        ["tabChanges", "changeThreshold", "lastAlert"],
+        ["tabChanges", "changeThreshold", "lastAlert", "enableMoodCheckins"],
         function (result) {
           const tabChanges = result.tabChanges || [];
           const changeThreshold = result.changeThreshold || 5;
           const lastAlert = result.lastAlert || 0;
+          const enableMoodCheckins = result.hasOwnProperty("enableMoodCheckins")
+            ? result.enableMoodCheckins
+            : true;
           tabChanges.push(Date.now());
           // save it again
           chrome.storage.local.set({ tabChanges: tabChanges });
@@ -35,6 +38,7 @@ chrome.tabs.onActivated.addListener((t) => {
           const numOfRecentTabChanges = tabChanges.filter((tc) => tc > limit)
             .length;
           if (
+            enableMoodCheckins &&
             numOfRecentTabChanges > changeThreshold &&
             lastAlert < limit - fiveMins * 2 &&
             currentHr > 8 &&
